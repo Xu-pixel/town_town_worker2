@@ -69,3 +69,21 @@ router
       response.body = await OrderModel.findById(params.rid)
     }
   )
+  .delete(
+    "/:rid", //雇主取消订单
+    SessionGuard,
+    async (ctx) => {
+      const order = (await OrderModel.findById(ctx.params.rid))!
+      if (order.owner!.toString() != ctx.state.userId) {
+        ctx.throw(Status.Forbidden, '您不是本单的雇主')
+      }
+      if (order.status === '进行中' || order.status === '已完成') {
+        ctx.throw(Status.BadRequest, '现在无法取消订单')
+      }
+      order.status = '已取消'
+      await order.save()
+      ctx.response.body = {
+        message: "订单取消成功"
+      }
+    }
+  )

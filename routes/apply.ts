@@ -29,6 +29,7 @@ router
       }
       if (applies.length === order.headCount - 1) {
         order.status = "待确认";
+        await order.save()
       }
       ctx.response.body = await ApplyModel.create({
         worker: ctx.state.userId,
@@ -71,6 +72,7 @@ router
       if (sumBy(othersApplies, (a) => a.finished ? 1 : 0) === order.headCount) {
         order.status = "已完成";
       }
+      await apply.save()
       ctx.response.body = {
         message: "已完成工作 " + apply.order,
       };
@@ -101,6 +103,7 @@ router
       if (!isDocument(apply.order)) return
       if (sumBy(applies, (a) => a.status === '已通过' ? 1 : 0) === apply.order.headCount) {
         apply.order.status = '进行中'
+        await apply.order.save()
       }
       ctx.response.body = {
         message: '已通过' + apply.worker?.toString() + '的审核'

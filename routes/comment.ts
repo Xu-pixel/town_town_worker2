@@ -9,15 +9,20 @@ export default router;
 
 router
   .get(
-    "/:uid",
-    async ({ params, response }) => {
-
+    "/user/:uid", //按id查询别人对他的评论
+    async (ctx) => {
+      ctx.response.body = await CommentModel.find({ receiver: ctx.params.uid }).exec()
+    }
+  )
+  .get(
+    "/order/:rid",
+    async (ctx) => {
+      ctx.response.body = await CommentModel.find({ order: ctx.params.rid }).exec()
     }
   )
   .post(
-    "/:uid",
-    SessionGuard,
-    async ({ request, response, params, state }) => {
+    "/",
+    async (ctx) => {
 
     }
   )

@@ -34,9 +34,9 @@ export class Apply {
 
   static async getAppliesByOrder(
     this: ReturnModelType<typeof Apply>,
-    Order: string,
+    order: string,
   ) {
-    const applies = await ApplyModel.find({ Order }).populate(
+    const applies = await ApplyModel.find({ order }).populate(
       "worker",
       "name status avatar phone area location",
     ).exec();

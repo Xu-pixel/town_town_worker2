@@ -18,7 +18,7 @@ router
     async (ctx) => {
       const applies = await ApplyModel.find({ order: ctx.params.rid }).exec();
       const order = (await OrderModel.findById(ctx.params.rid).exec())!;
-      if (order.status != "已发布" && order.status != "待确认") {
+      if (order.status != "待确认") {
         ctx.throw(Status.BadRequest, "不能再申请了");
       }
       if (applies.length >= order.headCount * 3) {
@@ -38,16 +38,42 @@ router
     },
   )
   .get(
+    "/order/:rid/worker/:uid", //根据工人和订单查申请
+    async (ctx) => {
+      ctx.response.body = await ApplyModel.findOne({
+        order: ctx.params.rid,
+        worker: ctx.params.uid
+      })
+    }
+  )
+  .get(
     "/order/:rid", //根据订单查申请人
     async (ctx) => {
-      ctx.response.body = await ApplyModel.getAppliesByOrder(ctx.params.rid);
+      const applies = await ApplyModel.getAppliesByOrder(ctx.params.rid);
+      const workers = []
+      for (const apply of applies) {
+        workers.push(apply.worker)
+      }
+      ctx.response.body = workers
     },
   )
   .get(
     "/worker/:uid", //根据申请人查订单
     async (ctx) => {
-      ctx.response.body = await ApplyModel.getAppliesByUser(ctx.params.uid);
+      const orders = []
+      const applies = await ApplyModel.getAppliesByUser(ctx.params.uid);
+      for (const apply of applies) {
+        orders.push(apply.order)
+      }
+      ctx.response.body = orders
     },
+  )
+  .get(
+    "/:rid", //获取与订单相关的申请
+    SessionGuard,
+    async (ctx) => {
+      ctx.response.body = await ApplyModel.getAppliesByOrder(ctx.params.rid);
+    }
   )
   .post(
     "/finish/:rid", //工人点击完成订单
@@ -65,14 +91,15 @@ router
         ctx.throw(Status.BadRequest, "您未通过雇主的确认");
       }
       apply.finished = true;
-      const othersApplies = await ApplyModel.find({
+      await apply.save()
+      const applies = await ApplyModel.find({
         order: ctx.params.rid,
         status: "已通过",
       });
-      if (sumBy(othersApplies, (a) => a.finished ? 1 : 0) === order.headCount) {
+      if (sumBy(applies, (a) => a.finished ? 1 : 0) === order.headCount) {
         order.status = "已完成";
+        await order.save()
       }
-      await apply.save()
       ctx.response.body = {
         message: "已完成工作 " + apply.order,
       };
@@ -95,8 +122,10 @@ router
   .post(
     "/check/:aid", //雇主审核
     async (ctx) => {
+      const { status } = await ctx.request.body().value
       const apply = (await ApplyModel.findById(ctx.params.aid).populate('order', 'headCount').exec())!
-      apply.status = '已通过'
+      apply.status = status
+      await apply.save()
       const applies = await ApplyModel.find({
         order: apply.order
       }).exec()
@@ -106,7 +135,7 @@ router
         await apply.order.save()
       }
       ctx.response.body = {
-        message: '已通过' + apply.worker?.toString() + '的审核'
+        message: status + apply.worker?.toString() + '的审核'
       }
     }
   )

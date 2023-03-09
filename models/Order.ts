@@ -42,8 +42,8 @@ export class Order {
   @prop({ required: true, ref: () => User })
   owner!: Ref<User>;
 
-  @prop({ default: "已发布", required: true })
-  status!: "已发布" | "待确认" | "进行中" | "已完成" | "已取消";
+  @prop({ default: "待确认", required: true })
+  status!: "待确认" | "进行中" | "已完成" | "已取消";
 }
 
 export const OrderModel = getModelForClass(Order);

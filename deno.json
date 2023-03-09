@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "emitDecoratorMetadata": true
+  },
+  "imports": {
+    "mongoose": "npm:mongoose@~6.7.2",
+    "typegoose": "npm:@typegoose/typegoose@9.13.x"
+  }
+}

@@ -2,10 +2,11 @@ import { Router, Status } from "https://deno.land/x/oak@v11.1.0/mod.ts";
 import { SessionGuard } from "../Middlewares.ts";
 import { ApplyModel } from "../models/Apply.ts";
 import { OrderModel } from "../models/Order.ts";
-
+import {
+  isDocument
+} from "npm:@typegoose/typegoose@9.13.x";
 // @deno-types="npm:@types/lodash@^4.14.191"
 import { sumBy } from "https://deno.land/x/lodash@4.17.15-es/lodash.js";
-import { isDocument } from "../../../AppData/Local/deno/npm/registry.npmjs.org/@typegoose/typegoose/9.13.2/lib/typeguards.d.ts";
 
 const router = new Router();
 export default router;
@@ -76,7 +77,7 @@ router
     },
   )
   .delete(
-    "/:rid",
+    "/:rid", //取消接单
     SessionGuard,
     async (ctx) => {
       const apply = (await ApplyModel.findOne({

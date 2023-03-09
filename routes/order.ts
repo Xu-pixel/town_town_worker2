@@ -21,6 +21,13 @@ router
       response.body = await OrderModel.create(orderForm)
     }
   )
+  .get(
+    "/owner",
+    SessionGuard,
+    async (ctx) => {
+      ctx.response.body = await OrderModel.find({ owner: ctx.state.userId }).exec()
+    }
+  )
   .put(
     "/:rid", //修改订单信息
     SessionGuard,

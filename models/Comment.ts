@@ -34,11 +34,11 @@ export class Comment {
     return commentsBox;
   }
 
-  static async getMessagesByOrder(
+  static async getCommentsByOrder(
     this: ReturnModelType<typeof Comment>,
-    Order: string,
+    order: string,
   ) {
-    const comments = await CommentModel.find({ Order }).exec();
+    const comments = await CommentModel.find({ order }).exec();
     if (!comments) return [];
     return comments;
   }
